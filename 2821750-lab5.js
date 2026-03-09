@@ -1,25 +1,7 @@
 const express = require('express');
 const app = express();
 const PORT = 3000;
-let books=[{id:"1",title:",mmc",details:[]},{
-  "id": "2",
-  "title": "The Great Adventure",
-  "author": "John Smith",
-  "genre": "Adventure",
-  "publicationYear": 2021,
-  "details": [
-    {
-      "id": "1",
-      "chapter": "Introduction",
-      "pages": 10
-    },
-    {
-      "id": "2",
-      "chapter": "The Journey Begins",
-      "pages": 25
-    }
-  ]
-}];
+let books=[];
 app.use(express.json());
 
 // Your routes here
@@ -38,7 +20,7 @@ app.get('/books/:id',(req,res)=>{
     const specific_book=books.find((book)=>book.id===id);
    
   if (!specific_book) {
-    return res.status(404).json({ error: "Student not found" });
+    return res.status(404).json({ error: "Book not found" });
   }
   res.status(200).json(specific_book);
    
@@ -91,7 +73,6 @@ app.post('/books/:id/details',(req,res)=>{
     res.status(201).json(book);
 });
 
-
 // Removes a specific detail from a book.
 app.delete('/books/:id/details/:detailId',(req,res)=>{
     const id=req.params.id;
@@ -101,9 +82,8 @@ app.delete('/books/:id/details/:detailId',(req,res)=>{
     if(!book || detailIndex===-1){
          return res.status(404).json({ "error": "Book or detail not found"});
     }
-    const deletedDetail = book.details.splice(detailIndex, 1)[0];
-    res.json({ message: "Detail deleted", detail: deletedDetail });
-    res.status(201).json({"passed":"passed"});
+    book.details.splice(detailIndex, 1)[0];
+    res.status(201);
 });
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
