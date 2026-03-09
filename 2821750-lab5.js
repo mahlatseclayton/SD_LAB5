@@ -1,18 +1,36 @@
 const express = require('express');
 const app = express();
 const PORT = 3000;
-let books=[{id:"1",title:",mmc",details:"dytghdg"}];
+let books=[{id:"1",title:",mmc",details:[]},{
+  "id": "2",
+  "title": "The Great Adventure",
+  "author": "John Smith",
+  "genre": "Adventure",
+  "publicationYear": 2021,
+  "details": [
+    {
+      "id": "1",
+      "chapter": "Introduction",
+      "pages": 10
+    },
+    {
+      "id": "2",
+      "chapter": "The Journey Begins",
+      "pages": 25
+    }
+  ]
+}];
 app.use(express.json());
 
 // Your routes here
 app.get('/whoami',(req,res)=>{
     // Returns your student number
     const studentNum={studentNumber:"2821750"};
-    res.json(studentNum);
+    res.status(200).json(studentNum);
 });
 app.get('/books',(req,res)=>{
     // return all books
-    res.json(books);
+    res.status(200).json(books);
 });
 //  get a specific book
 app.get('/books/:id',(req,res)=>{
@@ -22,7 +40,7 @@ app.get('/books/:id',(req,res)=>{
   if (!specific_book) {
     return res.status(404).json({ error: "Student not found" });
   }
-  res.json(specific_book);
+  res.status(200).json(specific_book);
    
 });
 //  add a book in the books collection
@@ -32,7 +50,8 @@ app.post('/books',(req,res)=>{
     if(!book.id || !book.title){
         return res.status(400).json({error:"Missing required fields"});
     }
-    res.json(book);
+    books.push(book);
+    res.status(201).json(book);
 });
 //  update book
 app.put('/books/:id',(req,res)=>{
@@ -44,7 +63,47 @@ app.put('/books/:id',(req,res)=>{
         return res.status(404).json({error:"Book not found"});
     }
      book.title=update_value;
-    res.json(book);
+    res.status(200).json(book);
+});
+// delete book
+app.delete('/books/:id',(req,res)=>{
+    const id=req.params.id;
+    const book=books.find((book)=>book.id===id);
+    if(!book){
+        return res.status(404).json({error: "Book not found"});
+    }
+    if(book){
+        books.filter((book)=>book.id===id);
+        res.status(200);
+    }
+});
+app.post('/books/:id/details',(req,res)=>{
+    const id=req.params.id;
+    const details=req.body.details;
+    const book=books.find((book)=>book.id===id);
+    if(!book){
+        return res.status(404).json({ "error": "Book not found"});
+    }
+     if (!book.details) {
+        book.details = [];
+    }
+     book.details.push(req.body);
+    res.status(201).json(book);
+});
+
+
+// Removes a specific detail from a book.
+app.delete('/books/:id/details/:detailId',(req,res)=>{
+    const id=req.params.id;
+    const detailId=req.params.detailId;
+    const book=books.find((book)=>book.id===id);
+    const detailIndex = book.details.findIndex(d => d.id === detailId);
+    if(!book || detailIndex===-1){
+         return res.status(404).json({ "error": "Book or detail not found"});
+    }
+    const deletedDetail = book.details.splice(detailIndex, 1)[0];
+    res.json({ message: "Detail deleted", detail: deletedDetail });
+    res.status(201).json({"passed":"passed"});
 });
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
