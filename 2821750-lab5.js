@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const PORT = 3000;
-let books=[];
+let books=[{id:"1",title:",mmc",details:"dytghdg"}];
 app.use(express.json());
 
 // Your routes here
@@ -29,12 +29,23 @@ app.get('/books/:id',(req,res)=>{
 app.post('/books',(req,res)=>{
     // get the book from body
     const book={id:req.body.id,title:req.body.title,details:req.body.details};
-    if(!book){
-        res.status(404).json({error:"Missing required fields"});
+    if(!book.id || !book.title){
+        return res.status(400).json({error:"Missing required fields"});
     }
     res.json(book);
 });
-
+//  update book
+app.put('/books/:id',(req,res)=>{
+    const id=req.params.id;
+    const book=books.find((book)=>book.id===id);
+    const update_value=req.body.title;
+   
+    if(!book){
+        return res.status(404).json({error:"Book not found"});
+    }
+     book.title=update_value;
+    res.json(book);
+});
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
